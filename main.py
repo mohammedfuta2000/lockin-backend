@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import json
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import asyncio
@@ -65,6 +66,35 @@ async def root():
 async def health_check():
     return {"status": "healthy"}
 
+
+@app.get("/.well-known/apple-app-site-association")
+async def apple_app_site_association():
+    """
+    Serve Apple App Site Association file for Universal Links
+    """
+    aasa_content = {
+        "applinks": {
+            "apps": [],
+            "details": [
+                {
+                    "appID": "GWF28Z9MW3.cloud.lockin.app", 
+                    "paths": [
+                        "/oauth/callback",
+                        "/oauth/*",
+                        "*"
+                    ]
+                }
+            ]
+        }
+    }
+    
+    return Response(
+        content=json.dumps(aasa_content),
+        media_type="application/json"
+    )
+    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=settings.port)
+    
+    
