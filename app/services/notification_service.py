@@ -1,10 +1,20 @@
 import firebase_admin
 from firebase_admin import credentials, messaging
 import os
+import json
+import base64
 
-# Initialize Firebase
-cred_path = os.path.join(os.path.dirname(__file__), '../../firebase-service-account.json')
-cred = credentials.Certificate(cred_path)
+# Initialize Firebase from environment variable
+if os.getenv('FIREBASE_SERVICE_ACCOUNT_BASE64'):
+    # Railway/Production
+    firebase_json = base64.b64decode(os.getenv('FIREBASE_SERVICE_ACCOUNT_BASE64'))
+    firebase_dict = json.loads(firebase_json)
+    cred = credentials.Certificate(firebase_dict)
+else:
+    # Local development
+    cred_path = os.path.join(os.path.dirname(__file__), '../../firebase-service-account.json')
+    cred = credentials.Certificate(cred_path)
+
 firebase_admin.initialize_app(cred)
 
 async def send_goal_notification(user_fcm_token: str, goal_title: str, goal_id: str, preview_text: str):
