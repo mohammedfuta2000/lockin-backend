@@ -100,6 +100,7 @@ async def create_goal(
         "title": goal_data.title,
         "description": goal_data.description,
         "deadline": goal_data.deadline.isoformat(),
+        "original_deadline": goal_data.deadline.isoformat(),
     }).execute()
     
     goal = goal_response.data[0]
@@ -121,7 +122,7 @@ async def create_goal(
 async def get_goals(current_user = Depends(get_current_user)):
     supabase = get_supabase_client()
     
-    # Get goals
+    # Get goals with postponement data
     goals_response = supabase.table("goals")\
         .select("*")\
         .eq("user_id", current_user.id)\
