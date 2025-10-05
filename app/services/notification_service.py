@@ -1,23 +1,26 @@
 import httpx
 import jwt
 import time
-from datetime import datetime, timedelta
+import base64
 import os
 
 # APNs configuration
-APNS_KEY_ID = os.getenv("APNS_KEY_ID")  # From Apple Developer Portal
-APNS_TEAM_ID = os.getenv("APNS_TEAM_ID")  # Your Apple Team ID
-APNS_KEY_PATH = os.getenv("APNS_KEY_PATH", "AuthKey.p8")  # Path to your .p8 file
+APNS_KEY_ID = os.getenv("APNS_KEY_ID")
+APNS_TEAM_ID = os.getenv("APNS_TEAM_ID")
+APNS_KEY_BASE64 = os.getenv("APNS_KEY_BASE64")
 APNS_BUNDLE_ID = "cloud.lockin.app"
 
-# APNs endpoint (use sandbox for development, production for release)
+# APNs endpoint
 APNS_SERVER = "api.push.apple.com"  # Production
 # APNS_SERVER = "api.sandbox.push.apple.com"  # Development/TestFlight
 
 def generate_apns_token():
     """Generate JWT token for APNs authentication"""
-    with open(APNS_KEY_PATH, 'r') as f:
-        signing_key = f.read()
+    if not APNS_KEY_BASE64:
+        raise ValueError("APNS_KEY_BASE64 environment variable not set")
+    
+    # Decode base64 key
+    signing_key = base64.b64decode(APNS_KEY_BASE64).decode('utf-8')
     
     headers = {
         "alg": "ES256",
