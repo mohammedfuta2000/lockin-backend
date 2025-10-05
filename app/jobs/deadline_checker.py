@@ -29,18 +29,18 @@ async def check_deadlines():
     print(f"Found {len(goals)} goals hitting deadline in 2 hours")
     
     for goal in goals:
-        # Get user's FCM token
+        # Get user's APNs token
         device_response = supabase.table("user_devices")\
-            .select("fcm_token")\
+            .select("apns_token")\
             .eq("user_id", goal["user_id"])\
             .single()\
             .execute()
         
-        if not device_response.data or not device_response.data.get("fcm_token"):
-            print(f"No FCM token for user {goal['user_id']}, skipping")
+        if not device_response.data or not device_response.data.get("apns_token"):
+            print(f"No APNs token for user {goal['user_id']}, skipping")
             continue
         
-        fcm_token = device_response.data["fcm_token"]
+        apns_token = device_response.data["apns_token"]
         
         # Get first generated post for preview
         posts_response = supabase.table("generated_posts")\
@@ -56,7 +56,7 @@ async def check_deadlines():
         
         # Send notification
         success = await send_goal_notification(
-            fcm_token,
+            apns_token,
             goal["title"],
             goal["id"],
             preview

@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "GWF28Z9MW3.cloud.lockin.app",
+        "paths": [
+          "/oauth/callback",
+          "/oauth/*",
+          "*"
+        ]
+      }
+    ]
+  }
+}
