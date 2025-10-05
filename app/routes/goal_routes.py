@@ -409,7 +409,17 @@ async def post_now(
         .eq("id", goal_id)\
         .execute()
     
-    return {"success": True, "results": results}
+    updated_goal = supabase.table("goals")\
+    .select("*")\
+    .eq("id", goal_id)\
+    .single()\
+    .execute()
+
+    return {
+        "success": True, 
+        "results": results,
+        "completed_goal": updated_goal.data  # Add this
+    }
 
 # Add this endpoint to goal_routes.py
 
@@ -490,3 +500,19 @@ async def postpone_goal(
         "remaining_postpone_minutes": 120 - (total_postponed + minutes),
         "new_deadline": new_deadline.isoformat()
     }
+    
+@router.get("/goals/history")
+async def get_completed_goals(current_user = Depends(get_current_user)):
+    """
+    Get completed goals with their posts
+    """
+    supabase = get_supabase_client()
+    
+    goals_response = supabase.table("goals")\
+        .select("*, goal_social_selections(social_accounts(platform, username))")\
+        .eq("user_id", current_user.id)\
+        .eq("completed", True)\
+        .order("completed_at", desc=True)\
+        .execute()
+    
+    return goals_response.data
